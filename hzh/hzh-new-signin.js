@@ -2,7 +2,7 @@
 华住会新版签到（Quantumult X）
 
 [rewrite_local]
-^https:\/\/appgw\.huazhu\.com\/game\/sign_in\? url script-request-header https://raw.githubusercontent.com/pray1412/Script/main/hzh/hzh-new-signin.js
+^https:\/\/appgw\.huazhu\.com\/ url script-request-header https://raw.githubusercontent.com/pray1412/Script/main/hzh/hzh-new-signin.js
 
 [task_local]
 5 9 * * * https://raw.githubusercontent.com/pray1412/Script/main/hzh/hzh-new-signin.js, tag=华住会新版签到, enabled=true
@@ -10,7 +10,7 @@
 [mitm]
 hostname = appgw.huazhu.com
 
-首次使用时，在华住会 App 手动签到一次以记录请求方法和 Cookie。
+进入华住会 App 或打开签到页时会自动更新 Cookie；手动签到时还会记录实际请求方法。
 */
 
 const STORE_KEY = "HZH_NEW_SIGNIN_REQUEST";
@@ -29,12 +29,26 @@ function finish() {
 
 if (typeof $request !== "undefined") {
   const cookie = header($request.headers, "Cookie");
-  const method = ($request.method || "GET").toUpperCase();
+  const requestUrl = $request.url || "";
+  const capturedMethod = ($request.method || "GET").toUpperCase();
+  const isSignInRequest = /^https:\/\/appgw\.huazhu\.com\/game\/sign_in(?:\?|$)/i.test(requestUrl);
+  let previous;
+  try {
+    previous = JSON.parse($prefs.valueForKey(STORE_KEY) || "null");
+  } catch (_) {
+    previous = null;
+  }
+  const previousMethod = String(
+    $prefs.valueForKey(METHOD_KEY) || (previous && previous.method) || "GET"
+  ).toUpperCase();
+  const method = isSignInRequest && ["GET", "POST"].includes(capturedMethod)
+    ? capturedMethod
+    : (["GET", "POST"].includes(previousMethod) ? previousMethod : "GET");
 
-  if (!cookie || !["GET", "POST"].includes(method)) {
-    console.log("华住会：未获取到有效 Cookie 或请求方法");
-    $notify("华住会", "获取签到请求失败", "请在 App 内手动签到后重试");
+  if (!cookie) {
+    console.log(`华住会：当前请求未携带 Cookie，已忽略：${requestUrl}`);
   } else {
+    const cookieChanged = cookie !== $prefs.valueForKey(COOKIE_KEY);
     const saved = {
       cookie,
       method,
@@ -46,8 +60,12 @@ if (typeof $request !== "undefined") {
     const ok = $prefs.setValueForKey(JSON.stringify(saved), STORE_KEY) &&
       $prefs.setValueForKey(cookie, COOKIE_KEY) &&
       $prefs.setValueForKey(method, METHOD_KEY);
-    console.log(`华住会：签到请求${ok ? "已保存" : "保存失败"}，方法 ${method}`);
-    $notify("华住会", ok ? "新版签到凭证已获取" : "凭证保存失败", ok ? "可运行定时任务" : "请检查 Quantumult X 配置");
+    console.log(`华住会：Cookie ${ok ? "已保存" : "保存失败"}，签到方法 ${method}`);
+    if (!ok) {
+      $notify("华住会", "凭证保存失败", "请检查 Quantumult X 配置");
+    } else if (cookieChanged) {
+      $notify("华住会", "Cookie 已自动更新", isSignInRequest ? `签到方法：${method}` : "已从 App 请求中获取");
+    }
   }
   finish();
 } else {
