@@ -18,8 +18,10 @@ const TOKEN_KEY = "READIFY_TOKEN";
 const USER_ID_KEY = "READIFY_USER_ID";
 const DEVICE_ID_KEY = "READIFY_DEVICE_ID";
 const CAMPAIGN_KEY = "READIFY_CAMPAIGN_ID";
+const AUTO_CLAIM_KEY = "READIFY_AUTO_CLAIM";
 const DEFAULT_CAMPAIGN_ID = "reading-streak-7d-202607";
 const CHECK_IN_URL = "https://readifyapp.voiceclub.cn/api/campaigns/streaks";
+const CLAIM_URL = "https://readifyapp.voiceclub.cn/api/campaigns/streaks/reward-claims";
 
 function header(headers, name) {
   const key = Object.keys(headers || {}).find(item => item.toLowerCase() === name.toLowerCase());
@@ -51,6 +53,37 @@ function finish(value) {
   $done(value || {});
 }
 
+function claimReward(headers, campaignId, day, interrupted) {
+  $task.fetch({
+    url: CLAIM_URL,
+    method: "POST",
+    headers,
+    body: JSON.stringify({ campaignId })
+  }).then(response => {
+    try {
+      const result = JSON.parse(response.body);
+      const data = result.data || {};
+      if (response.statusCode === 200 && result.code === 0) {
+        const rewardCount = data.rewardCount == null ? "未知数量" : data.rewardCount;
+        const ultraHdDays = data.ultraHdDays == null ? "未知天数" : `${data.ultraHdDays} 天`;
+        $notify("Readify 第 7 天奖励已领取", `已连续签到 ${day} 天${interrupted}`, `克隆音色位置：${rewardCount}；高清音质：${ultraHdDays}`);
+      } else if (result.code === 240010) {
+        $notify("Readify 奖励已领取", `已连续签到 ${day} 天${interrupted}`, result.message || "无需重复领取");
+      } else {
+        $notify("Readify 自动领奖失败", `HTTP ${response.statusCode} / ${result.code == null ? "未知" : result.code}`, result.message || "请进入活动页面手动领取");
+      }
+    } catch (error) {
+      console.log(`Readify：领奖响应解析失败：${error}`);
+      $notify("Readify 自动领奖异常", "无法解析服务器响应", "请进入活动页面手动领取");
+    }
+    finish();
+  }, error => {
+    console.log(`Readify：领奖请求失败：${error.error || error}`);
+    $notify("Readify 自动领奖失败", "网络请求异常", "请进入活动页面手动领取");
+    finish();
+  });
+}
+
 if (typeof $request !== "undefined") {
   const captured = captureHeaders($request.headers);
   const token = captured["x-token"];
@@ -77,6 +110,8 @@ if (typeof $request !== "undefined") {
   const userId = ($prefs.valueForKey(USER_ID_KEY) || saved["x-user-id"] || "").trim();
   const deviceId = ($prefs.valueForKey(DEVICE_ID_KEY) || saved["x-device-id"] || "").trim();
   const campaignId = ($prefs.valueForKey(CAMPAIGN_KEY) || DEFAULT_CAMPAIGN_ID).trim();
+  const autoClaimValue = $prefs.valueForKey(AUTO_CLAIM_KEY);
+  const autoClaim = autoClaimValue == null || String(autoClaimValue).toLowerCase() !== "false";
 
   if (!token || !userId) {
     $notify("Readify", "尚未获取登录凭证", "请先登录并进入 Readify App");
@@ -116,7 +151,12 @@ if (typeof $request !== "undefined") {
           const interrupted = data.interrupted === true ? "，本轮曾中断并已重置" : "";
 
           if (data.canClaim === true || (day >= 7 && !data.claimedAt && data.roundStatus !== "CLAIMED_WAITING")) {
-            $notify("Readify 第 7 天签到完成", `已连续签到 ${day} 天${interrupted}`, "奖励已可领取，请进入活动页面领取");
+            if (autoClaim) {
+              console.log("Readify：第 7 天签到完成，开始自动领取奖励");
+              claimReward(headers, campaignId, day, interrupted);
+              return;
+            }
+            $notify("Readify 第 7 天签到完成", `已连续签到 ${day} 天${interrupted}`, "自动领奖已关闭，请进入活动页面领取");
           } else if (already) {
             $notify("Readify 今日已签到", `已签到 ${day} 天${interrupted}`, "无需重复操作");
           } else if (checked) {
