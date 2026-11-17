@@ -8,7 +8,7 @@
       "name": "华住会新版签到",
       "descs": [
         "填写 Cookie 后，点击右上角 ▶️ 可立即运行签到。",
-        "也可通过 Quantumult X 重写，在 App 手动签到时自动更新 Cookie。"
+        "也可通过 Quantumult X 重写，进入 App 或签到页时自动更新 Cookie。"
       ],
       "keys": [
         "HZH_NEW_SIGNIN_COOKIE",
@@ -29,7 +29,7 @@
           "name": "请求方法",
           "val": "GET",
           "type": "text",
-          "desc": "填写手动签到请求的 HTTP 方法：GET 或 POST。自动抓取时会同步保存。"
+          "desc": "填写签到请求的 HTTP 方法：GET 或 POST。手动签到时会自动识别并同步保存。"
         }
       ],
       "repo": "https://github.com/pray1412/Script/tree/main/hzh",
