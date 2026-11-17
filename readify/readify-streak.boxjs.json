@@ -14,17 +14,18 @@
         "READIFY_TOKEN",
         "READIFY_USER_ID",
         "READIFY_DEVICE_ID",
-        "READIFY_CAMPAIGN_ID"
+        "READIFY_CAMPAIGN_ID",
+        "READIFY_AUTO_CLAIM"
       ],
       "settings": [
         {
           "id": "READIFY_TOKEN",
-          "name": "x-token",
+          "name": "登录 Cookie（x-token）",
           "val": "",
           "type": "textarea",
           "autoGrow": true,
           "rows": 3,
-          "desc": "登录凭证。建议通过 Quantumult X 重写自动获取，不要公开分享。"
+          "desc": "Readify 实际使用 x-token 作为登录凭证。建议通过 Quantumult X 重写自动获取，不要公开分享。"
         },
         {
           "id": "READIFY_USER_ID",
@@ -43,6 +44,13 @@
           "name": "活动 ID",
           "val": "reading-streak-7d-202607",
           "type": "text"
+        },
+        {
+          "id": "READIFY_AUTO_CLAIM",
+          "name": "第 7 天自动领取奖励",
+          "val": true,
+          "type": "boolean",
+          "desc": "默认开启。关闭后，第 7 天只发送可领奖提醒。"
         }
       ],
       "repo": "https://github.com/pray1412/Script/tree/main/readify",
