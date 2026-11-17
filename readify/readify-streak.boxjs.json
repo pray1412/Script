@@ -1,0 +1,53 @@
+{
+  "id": "local.readify.streak.sub",
+  "name": "Readify 7 天签到",
+  "author": "Codex",
+  "apps": [
+    {
+      "id": "local.readify.streak",
+      "name": "Readify 7 天签到",
+      "descs": [
+        "进入 Readify App 时自动保存登录凭证，也可以在这里手动填写。",
+        "点击右上角 ▶️ 可立即签到；第 7 天会提醒进入活动页领取奖励。"
+      ],
+      "keys": [
+        "READIFY_TOKEN",
+        "READIFY_USER_ID",
+        "READIFY_DEVICE_ID",
+        "READIFY_CAMPAIGN_ID"
+      ],
+      "settings": [
+        {
+          "id": "READIFY_TOKEN",
+          "name": "x-token",
+          "val": "",
+          "type": "textarea",
+          "autoGrow": true,
+          "rows": 3,
+          "desc": "登录凭证。建议通过 Quantumult X 重写自动获取，不要公开分享。"
+        },
+        {
+          "id": "READIFY_USER_ID",
+          "name": "x-user-id",
+          "val": "",
+          "type": "text"
+        },
+        {
+          "id": "READIFY_DEVICE_ID",
+          "name": "x-device-id",
+          "val": "",
+          "type": "text"
+        },
+        {
+          "id": "READIFY_CAMPAIGN_ID",
+          "name": "活动 ID",
+          "val": "reading-streak-7d-202607",
+          "type": "text"
+        }
+      ],
+      "repo": "https://github.com/pray1412/Script/tree/main/readify",
+      "script": "https://raw.githubusercontent.com/pray1412/Script/main/readify/readify-streak.js",
+      "script_timeout": 20
+    }
+  ]
+}
