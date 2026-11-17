@@ -1,0 +1,40 @@
+{
+  "id": "local.hzh.new.signin.sub",
+  "name": "华住会新版签到",
+  "author": "Codex",
+  "apps": [
+    {
+      "id": "local.hzh.new.signin",
+      "name": "华住会新版签到",
+      "descs": [
+        "填写 Cookie 后，点击右上角 ▶️ 可立即运行签到。",
+        "也可通过 Quantumult X 重写，在 App 手动签到时自动更新 Cookie。"
+      ],
+      "keys": [
+        "HZH_NEW_SIGNIN_COOKIE",
+        "HZH_NEW_SIGNIN_METHOD"
+      ],
+      "settings": [
+        {
+          "id": "HZH_NEW_SIGNIN_COOKIE",
+          "name": "签到 Cookie",
+          "val": "",
+          "type": "textarea",
+          "autoGrow": true,
+          "rows": 4,
+          "desc": "粘贴签到请求中 Cookie 请求头的完整值，格式为 name=value; name2=value2。不要粘贴响应 Set-Cookie，也不要公开分享。"
+        },
+        {
+          "id": "HZH_NEW_SIGNIN_METHOD",
+          "name": "请求方法",
+          "val": "GET",
+          "type": "text",
+          "desc": "填写手动签到请求的 HTTP 方法：GET 或 POST。自动抓取时会同步保存。"
+        }
+      ],
+      "repo": "https://github.com/pray1412/Script/tree/main/hzh",
+      "script": "https://raw.githubusercontent.com/pray1412/Script/main/hzh/hzh-new-signin.js",
+      "script_timeout": 20
+    }
+  ]
+}
